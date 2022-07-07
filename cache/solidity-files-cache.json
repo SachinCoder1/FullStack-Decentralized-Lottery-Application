@@ -2,11 +2,11 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\blockchain projects\\Decentralized Lottery\\contracts\\DecentralizedLottery.sol": {
-      "lastModificationDate": 1657190407360,
-      "contentHash": "f5ee4f480bfa84f20dc43f06ce1d00c5",
+      "lastModificationDate": 1657197242942,
+      "contentHash": "1ab7dbb447469048a399da627e7b1f8a",
       "sourceName": "contracts/DecentralizedLottery.sol",
       "solcConfig": {
-        "version": "0.8.6",
+        "version": "0.8.7",
         "settings": {
           "optimizer": {
             "enabled": false,
@@ -37,10 +37,11 @@
       },
       "imports": [
         "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol",
-        "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol"
+        "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol",
+        "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol"
       ],
       "versionPragmas": [
-        "^0.8.6"
+        "^0.8.7"
       ],
       "artifacts": [
         "DecentralizedLottery"
@@ -51,7 +52,7 @@
       "contentHash": "eb9cc526ef59dfc4d644f56ddca0633a",
       "sourceName": "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol",
       "solcConfig": {
-        "version": "0.8.6",
+        "version": "0.8.7",
         "settings": {
           "optimizer": {
             "enabled": false,
@@ -93,7 +94,7 @@
       "contentHash": "56ec852a2aeddf81bf5a5720a7fc6a63",
       "sourceName": "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol",
       "solcConfig": {
-        "version": "0.8.6",
+        "version": "0.8.7",
         "settings": {
           "optimizer": {
             "enabled": false,
@@ -128,6 +129,90 @@
       ],
       "artifacts": [
         "VRFCoordinatorV2Interface"
+      ]
+    },
+    "C:\\blockchain projects\\Decentralized Lottery\\node_modules\\@chainlink\\contracts\\src\\v0.8\\interfaces\\KeeperCompatibleInterface.sol": {
+      "lastModificationDate": 1657187539843,
+      "contentHash": "bdbf3e274e50272d9c830fa414fcbec9",
+      "sourceName": "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "KeeperCompatibleInterface"
+      ]
+    },
+    "C:\\blockchain projects\\Decentralized Lottery\\node_modules\\hardhat\\console.sol": {
+      "lastModificationDate": 1657111154440,
+      "contentHash": "cc4777addd464ea56fa35b1c45df0591",
+      "sourceName": "hardhat/console.sol",
+      "solcConfig": {
+        "version": "0.8.7",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "devdoc",
+                "userdoc",
+                "storageLayout",
+                "evm.gasEstimates"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          },
+          "metadata": {
+            "useLiteralContent": true
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "console"
       ]
     }
   }

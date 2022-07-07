@@ -1,20 +1,25 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.7;
 
 // Imports
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 
 // Custom errors
 error Lottery__NotOwner();
 error Lottery__NotEnoughEthEntered();
 error Lottery__TransferToWinnerFailed();
+error Lottery__NotOpen();
+error Lottery__UpKeepNotNeeded(uint256 currentBalance, uint256 numOfPlayers, uint256 raffleState);
 
 // Contract
-contract DecentralizedLottery is VRFConsumerBaseV2 {
+contract DecentralizedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     // State Variables
     uint256 private immutable entranceFee; // Fee to get one lottery ticket.
+    uint256 private lastTimeStamp;
+    uint256 private immutable interval;
 
     address public owner; // Owner of the contract
     address private recentWinner; // The most recent winner
@@ -30,6 +35,10 @@ contract DecentralizedLottery is VRFConsumerBaseV2 {
     uint32 private constant NO_OF_WORDS = 1;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
 
+    // Enums
+    enum LotteryState {OPEN, CALCULATING }
+    LotteryState private _LotteryState;
+
     // Events
     event lotteryEnter(address indexed player);
     event randomNumberPick(uint256 indexed requestId);
@@ -41,7 +50,8 @@ contract DecentralizedLottery is VRFConsumerBaseV2 {
         uint256 _entranceFee,
         bytes32 _gasLane,
         uint64 _subscriptionId,
-        uint32 _callbackGasLimit
+        uint32 _callbackGasLimit,
+        uint256 _interval
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         entranceFee = _entranceFee;
         owner = msg.sender;
@@ -49,6 +59,9 @@ contract DecentralizedLottery is VRFConsumerBaseV2 {
         gasLane = _gasLane;
         subscriptionId = _subscriptionId;
         callbackGasLimit = _callbackGasLimit;
+        _LotteryState = LotteryState.OPEN;
+        lastTimeStamp = block.timestamp;
+        interval = _interval;
     }
 
     // Modifiers
@@ -84,18 +97,61 @@ contract DecentralizedLottery is VRFConsumerBaseV2 {
         return recentWinner;
     }
 
+    // Get Lottery State
+    function getLotteryState() public view returns (LotteryState) {
+        return _LotteryState;
+    }
+
+    // Get Numbers of players
+        function getNumbersOfPlayers() public view returns (uint256) {
+        return allPlayers.length;
+    }
+
+    // Get last block timestamp
+        function getLastTimeStamp() public view returns (uint256) {
+        return lastTimeStamp;
+    }
+
+    // Get Num Words
+    function getNumWords() public pure returns (uint256) {
+        return NO_OF_WORDS;
+    }
+
+    // Get Request confirmations
+    function getRequestConfirmations() public pure returns (uint256) {
+        return REQUEST_CONFIRMATIONS;
+    }
+
     // Functions
 
     // Enter the lottery ticket.
     function enterLottery() public payable notEnoughEthEntered {
+        if(_LotteryState != LotteryState.OPEN) {revert Lottery__NotOpen();}
         allPlayers.push(payable(msg.sender));
 
         //   Emitting events
         emit lotteryEnter(msg.sender);
     }
 
+    function checkUpkeep(bytes memory /*checkData*/) public view override returns(bool upkeepNeeded, bytes memory /* performData */) {
+        bool isOpen = (_LotteryState == LotteryState.OPEN);
+        bool timePassed = ((block.timestamp - lastTimeStamp) > interval);
+        bool hasPlayers = (allPlayers.length > 0);
+        bool hasBalance = address(this).balance > 0;
+        upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBalance);
+        return (upkeepNeeded, "0x0");
+
+
+    }
+
     // Pick a random number;
-    function pickRandomNumber() external {
+    function performUpkeep(bytes calldata /* performData */) external override {
+        (bool upkeepNeeded, ) = checkUpkeep("");
+        if(!upkeepNeeded) {
+            revert Lottery__UpKeepNotNeeded(address(this).balance, allPlayers.length, uint256(_LotteryState));
+        }
+
+        _LotteryState = LotteryState.CALCULATING;
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             gasLane,
             subscriptionId,
@@ -118,6 +174,9 @@ contract DecentralizedLottery is VRFConsumerBaseV2 {
         (bool success, ) = recentWinner.call{value: address(this).balance}("");
         if(!success) {revert Lottery__TransferToWinnerFailed();}
         emit winnerPicked(recentWinner);
+        _LotteryState = LotteryState.OPEN;
+        allPlayers = new address payable[](0);
+        lastTimeStamp = block.timestamp;
 
     }
 }
