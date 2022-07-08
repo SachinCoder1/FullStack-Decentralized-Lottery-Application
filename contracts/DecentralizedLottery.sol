@@ -8,11 +8,14 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/KeeperCompatibleInterface.sol";
 
 // Custom errors
-error Lottery__NotOwner();
 error Lottery__NotEnoughEthEntered();
 error Lottery__TransferToWinnerFailed();
 error Lottery__NotOpen();
-error Lottery__UpKeepNotNeeded(uint256 currentBalance, uint256 numOfPlayers, uint256 raffleState);
+error Lottery__UpKeepNotNeeded(
+    uint256 currentBalance,
+    uint256 numOfPlayers,
+    uint256 raffleState
+);
 
 // Contract
 contract DecentralizedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
@@ -21,9 +24,7 @@ contract DecentralizedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint256 private lastTimeStamp;
     uint256 private immutable interval;
 
-    address public owner; // Owner of the contract
     address private recentWinner; // The most recent winner
-
     address payable[] private allPlayers;
 
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
@@ -36,7 +37,10 @@ contract DecentralizedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
 
     // Enums
-    enum LotteryState {OPEN, CALCULATING }
+    enum LotteryState {
+        OPEN,
+        CALCULATING
+    }
     LotteryState private _LotteryState;
 
     // Events
@@ -54,7 +58,6 @@ contract DecentralizedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
         uint256 _interval
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         entranceFee = _entranceFee;
-        owner = msg.sender;
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         gasLane = _gasLane;
         subscriptionId = _subscriptionId;
@@ -65,13 +68,6 @@ contract DecentralizedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }
 
     // Modifiers
-    modifier notOwner() {
-        if (owner != msg.sender) {
-            revert Lottery__NotOwner();
-        }
-        _;
-    }
-
     // The entered value is less then the entrance fee.
     modifier notEnoughEthEntered() {
         if (msg.value < entranceFee) {
@@ -103,12 +99,12 @@ contract DecentralizedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
     }
 
     // Get Numbers of players
-        function getNumbersOfPlayers() public view returns (uint256) {
+    function getNumbersOfPlayers() public view returns (uint256) {
         return allPlayers.length;
     }
 
     // Get last block timestamp
-        function getLastTimeStamp() public view returns (uint256) {
+    function getLastTimeStamp() public view returns (uint256) {
         return lastTimeStamp;
     }
 
@@ -126,29 +122,45 @@ contract DecentralizedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     // Enter the lottery ticket.
     function enterLottery() public payable notEnoughEthEntered {
-        if(_LotteryState != LotteryState.OPEN) {revert Lottery__NotOpen();}
+        if (_LotteryState != LotteryState.OPEN) {
+            revert Lottery__NotOpen();
+        }
         allPlayers.push(payable(msg.sender));
 
         //   Emitting events
         emit lotteryEnter(msg.sender);
     }
 
-    function checkUpkeep(bytes memory /*checkData*/) public view override returns(bool upkeepNeeded, bytes memory /* performData */) {
+    function checkUpkeep(
+        bytes memory /*checkData*/
+    )
+        public
+        view
+        override
+        returns (
+            bool upkeepNeeded,
+            bytes memory /* performData */
+        )
+    {
         bool isOpen = (_LotteryState == LotteryState.OPEN);
         bool timePassed = ((block.timestamp - lastTimeStamp) > interval);
         bool hasPlayers = (allPlayers.length > 0);
         bool hasBalance = address(this).balance > 0;
         upkeepNeeded = (isOpen && timePassed && hasPlayers && hasBalance);
         return (upkeepNeeded, "0x0");
-
-
     }
 
     // Pick a random number;
-    function performUpkeep(bytes calldata /* performData */) external override {
+    function performUpkeep(
+        bytes calldata /* performData */
+    ) external override {
         (bool upkeepNeeded, ) = checkUpkeep("");
-        if(!upkeepNeeded) {
-            revert Lottery__UpKeepNotNeeded(address(this).balance, allPlayers.length, uint256(_LotteryState));
+        if (!upkeepNeeded) {
+            revert Lottery__UpKeepNotNeeded(
+                address(this).balance,
+                allPlayers.length,
+                uint256(_LotteryState)
+            );
         }
 
         _LotteryState = LotteryState.CALCULATING;
@@ -164,19 +176,20 @@ contract DecentralizedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
         emit randomNumberPick(requestId);
     }
 
-    function fulfillRandomWords(uint256 /*requestId*/, uint256[] memory randomWords)
-        internal
-        override
-    {
+    function fulfillRandomWords(
+        uint256, /*requestId*/
+        uint256[] memory randomWords
+    ) internal override {
         uint256 index = randomWords[0] % allPlayers.length;
         address payable _recentWinner = allPlayers[index];
         recentWinner = _recentWinner;
         (bool success, ) = recentWinner.call{value: address(this).balance}("");
-        if(!success) {revert Lottery__TransferToWinnerFailed();}
+        if (!success) {
+            revert Lottery__TransferToWinnerFailed();
+        }
         emit winnerPicked(recentWinner);
         _LotteryState = LotteryState.OPEN;
         allPlayers = new address payable[](0);
         lastTimeStamp = block.timestamp;
-
     }
 }
