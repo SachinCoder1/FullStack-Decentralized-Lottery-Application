@@ -156,6 +156,82 @@ if (!developmentChains.includes(network.name)) {
       });
     });
 
-    
+    describe("fulfillRandomWords", () => {
+      beforeEach(async () => {
+        await decentralizedLottery.enterLottery({ value: entranceFee });
+        await network.provider.send("evm_increaseTime", [
+          interval.toNumber() + 1,
+        ]);
+        await network.provider.send("evm_mine", []);
+      });
+
+      it("Should be called only after performUpkeep", async () => {
+        await expect(
+          vrfCoordinatorV2Mock.fulfillRandomWords(
+            0,
+            decentralizedLottery.address
+          )
+        ).to.be.revertedWith("nonexistent request");
+        await expect(
+          vrfCoordinatorV2Mock.fulfillRandomWords(
+            1,
+            decentralizedLottery.address
+          )
+        ).to.be.revertedWith("nonexistent request");
+      });
+
+      it("picks a winner, resets the lottery, and sends money", async () => {
+        const extraUsers = 3;
+        const startingUser = 1;
+        const accounts = await ethers.getSigners();
+        for (let i = startingUser; i < startingUser + extraUsers; i++) {
+          const accountConnectedUsers = await decentralizedLottery.connect(
+            accounts[i]
+          );
+          await accountConnectedUsers.enterLottery({ value: entranceFee });
+        }
+        const startingTimeStamp = await decentralizedLottery.getLastTimeStamp();
+
+        await new Promise(async (resolve, reject) => {
+          decentralizedLottery.once("winnerPicked", async () => {
+            resolve();
+            try {
+              console.log("This is account 1", accounts[0].address);
+              console.log("This is account 1", accounts[1].address);
+              console.log("This is account 2", accounts[2].address);
+              console.log("This is account 3", accounts[3].address);
+              const recentWinner = await decentralizedLottery.getRecentWinner();
+              console.log(recentWinner);
+              const lotteryState = await decentralizedLottery.getLotteryState();
+              const endingTimeStamp =
+                await decentralizedLottery.getLastTimeStamp();
+              const numPlayers =
+                await decentralizedLottery.getNumbersOfPlayers();
+              const winnerEndingBalance = await accounts[1].getBalance();
+
+              assert.equal(numPlayers.toString(), "0");
+              assert.equal(lotteryState.toString(), "0");
+              assert(endingTimeStamp > startingTimeStamp);
+              assert.equal(
+                winnerEndingBalance.toString(),
+                winnerStartingBalance.add(
+                  entranceFee.mul(extraUsers).add(entranceFee)
+                )
+              );
+            } catch (error) {
+              reject(error);
+            }
+          });
+
+          const tx = await decentralizedLottery.performUpkeep([]);
+          const txReceipt = await tx.wait(1);
+          const winnerStartingBalance = await accounts[1].getBalance();
+          await vrfCoordinatorV2Mock.fulfillRandomWords(
+            txReceipt.events[1].args.requestId,
+            decentralizedLottery.address
+          );
+        });
+      });
+    });
   });
 }
