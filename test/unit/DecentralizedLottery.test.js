@@ -75,9 +75,58 @@ if (!developmentChains.includes(network.name)) {
       });
     });
 
+    describe("checkUpKeep", () => {
+      it("return false if there is no users who have paid.", async () => {
+        await network.provider.send("evm_increaseTime", [
+          interval.toNumber() + 1,
+        ]);
+        await network.provider.send("evm_mine", []);
+        const { upkeepNeeded } =
+          await decentralizedLottery.callStatic.checkUpkeep([]);
+        assert(!upkeepNeeded);
+      });
+
+      it("returns false if raffle is not open", async () => {
+        await decentralizedLottery.enterLottery({ value: entranceFee });
+        await network.provider.send("evm_increaseTime", [
+          interval.toNumber() + 1,
+        ]);
+        await network.provider.send("evm_mine", []);
+        await decentralizedLottery.performUpkeep([]);
+        const lotteryState = await decentralizedLottery.getLotteryState();
+        const { upkeepNeeded } =
+          await decentralizedLottery.callStatic.checkUpkeep([]);
+        assert.equal(lotteryState.toString(), "1");
+        assert.equal(upkeepNeeded, false);
+      });
+
+      it("returns false if enough time has not passed", async () => {
+        await decentralizedLottery.enterLottery({ value: entranceFee });
+
+        // await network.provider.send("evm_increaseTime", [
+        //   interval.toNumber() - 1,
+        // ]);
+        await network.provider.send("evm_mine", []);
+        const { upkeepNeeded } =
+          await decentralizedLottery.callStatic.checkUpkeep("0x");
+        assert(!upkeepNeeded);
+      });
+
+      it("returns true if interval and all necessary things are true and has passed", async () => {
+        await decentralizedLottery.enterLottery({ value: entranceFee });
+
+        await network.provider.send("evm_increaseTime", [
+          interval.toNumber() + 1,
+        ]);
+        await network.provider.send("evm_mine", []);
+        const { upkeepNeeded } =
+          await decentralizedLottery.callStatic.checkUpkeep("0x");
+        assert(upkeepNeeded);
+      });
+    });
+
+
+
     
-
-
-
   });
 }
