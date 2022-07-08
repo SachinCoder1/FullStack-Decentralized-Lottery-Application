@@ -125,7 +125,36 @@ if (!developmentChains.includes(network.name)) {
       });
     });
 
+    describe("performUpkeep", () => {
+      it("It only runs if checkupkeep function returns true", async () => {
+        await decentralizedLottery.enterLottery({ value: entranceFee });
+        await network.provider.send("evm_increaseTime", [
+          interval.toNumber() + 1,
+        ]);
+        await network.provider.send("evm_mine", []);
+        const tx = await decentralizedLottery.performUpkeep([]);
+        assert(tx);
+      });
+      it("revert if the checkupkeep is false", async () => {
+        await expect(decentralizedLottery.performUpkeep([])).to.be.revertedWith(
+          "Lottery__UpKeepNotNeeded"
+        );
+      });
 
+      it("updates the lottery state and calls the performUpkeep", async () => {
+        await decentralizedLottery.enterLottery({ value: entranceFee });
+        await network.provider.send("evm_increaseTime", [
+          interval.toNumber() + 1,
+        ]);
+        await network.provider.send("evm_mine", []);
+        const txResponse = await decentralizedLottery.performUpkeep([]);
+        const txReceipt = await txResponse.wait(1);
+        const requestId = txReceipt.events[1].args.requestId;
+        const lotteryState = await decentralizedLottery.getLotteryState();
+        assert(requestId.toNumber() > 0);
+        assert(lotteryState.toString() == "1");
+      });
+    });
 
     
   });
