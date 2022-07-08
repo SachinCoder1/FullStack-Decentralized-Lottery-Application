@@ -113,6 +113,11 @@ contract DecentralizedLottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
         return NO_OF_WORDS;
     }
 
+    // Get Interval
+    function getInterval() public view returns (uint256) {
+        return interval;
+    }
+
     // Get Request confirmations
     function getRequestConfirmations() public pure returns (uint256) {
         return REQUEST_CONFIRMATIONS;

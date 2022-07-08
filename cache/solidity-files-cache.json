@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\blockchain projects\\Decentralized Lottery\\contracts\\DecentralizedLottery.sol": {
-      "lastModificationDate": 1657206329623,
-      "contentHash": "356429b24216aa52cba16aca160788fa",
+      "lastModificationDate": 1657265743850,
+      "contentHash": "ce04b6d05b3b727ae33b613e3909ce3a",
       "sourceName": "contracts/DecentralizedLottery.sol",
       "solcConfig": {
         "version": "0.8.7",
