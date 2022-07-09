@@ -58,7 +58,7 @@ if (!developmentChains.includes(network.name)) {
               reject(error);
             }
           });
-          // Then entering the lottery
+          // Then entering the lottery 
           console.log("Entering decentralizedLottery...");
           const tx = await decentralizedLottery.enterLottery({ value: entranceFee });
           await tx.wait(1);

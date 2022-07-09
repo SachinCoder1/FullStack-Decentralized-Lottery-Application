@@ -1,20 +1,24 @@
-const {run} = require('hardhat');
-const verify = async (contractAddress, args) => {
-    console.log('verifying contract....');
-    try{
-        await run("verify:verify", {
-            address: contractAddress, 
-            constructorArguments: args
-        })
-       
-    } catch(e){
-        if(e.message.toLowerCase().includes("already verified")) {
-            console.log('Already Verified');
+// we can't have these functions in our `helper-hardhat-config`
+// since these use the hardhat library
+// and it would be a circular dependency
+const { run } = require("hardhat")
 
-        }else{
-            console.log("You are in the verify.js else part", e)
+const verify = async (contractAddress, args) => {
+    console.log("Verifying contract...")
+    try {
+        await run("verify:verify", {
+            address: contractAddress,
+            constructorArguments: args,
+        })
+    } catch (e) {
+        if (e.message.toLowerCase().includes("already verified")) {
+            console.log("Already verified!")
+        } else {
+            console.log("You are in else part of verify", e)
         }
     }
 }
 
-module.exports = {verify}
+module.exports = {
+    verify,
+}
