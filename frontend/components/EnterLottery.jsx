@@ -25,7 +25,7 @@ export default function EnterLottery() {
     msgValue: entranceFee,
   });
 
-  const { runContractFunction: getEntranceFee } = useWeb3Contract({
+  const { runContractFunction: getEntranceFee, isLoading, isFetching } = useWeb3Contract({
     abi,
     contractAddress: lotteryAddress,
     functionName: "getEntranceFee",
@@ -58,7 +58,7 @@ export default function EnterLottery() {
   const handleSuccess = async (tx) => {
     await tx.wait(1);
     handleNewNotification(tx);
-    getAll()
+    // getAll()
   };
 
   const handleNewNotification = () => {
@@ -71,16 +71,16 @@ export default function EnterLottery() {
     });
   };
 
-  const getAll = async () => {
-    const getFee = (await getEntranceFee()).toString();
-    const getNumOfPlayers = (await getNumbersOfPlayers()).toString();
-    const getWinner = await getRecentWinner();
-    setEntranceFee(getFee);
-    setAllPlayers(getNumOfPlayers);
-    setRecentWinner(getWinner);
-  };
   useEffect(() => {
     if (isWeb3Enabled) {
+      const getAll = async () => {
+        const getFee = (await getEntranceFee()).toString();
+        const getNumOfPlayers = (await getNumbersOfPlayers()).toString();
+        const getWinner = await getRecentWinner();
+        setEntranceFee(getFee);
+        setAllPlayers(getNumOfPlayers);
+        setRecentWinner(getWinner);
+      };
       getAll();
     }
   }, [isWeb3Enabled]);
@@ -99,7 +99,7 @@ export default function EnterLottery() {
             Recent Winner: {recentWinner && recentWinner}
            </p>
           <div>
-            <button onClick={handleClick}>Enter Lottery</button>
+            <button disabled={isFetching || isLoading} onClick={handleClick}>Enter Lottery</button>
           </div>
         </div>
       ) : (
