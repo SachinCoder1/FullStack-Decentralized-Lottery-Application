@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useWeb3Contract, useMoralis } from "react-moralis";
 import { contractAddresses, abi } from "../constants";
 import { ethers } from "ethers";
-import { useNotification } from "web3uikit";
+import { Loading, useNotification } from "web3uikit";
 
 export default function EnterLottery() {
   const [entranceFee, setEntranceFee] = useState();
-  const [recentWinner, setRecentWinner] = useState()
-  const [allPlayers, setAllPlayers] = useState()
+  const [recentWinner, setRecentWinner] = useState();
+  const [allPlayers, setAllPlayers] = useState();
 
   const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
   const dispatch = useNotification();
@@ -15,7 +15,6 @@ export default function EnterLottery() {
   const chainId = parseInt(chainIdHex);
   const lotteryAddress =
     chainId in contractAddresses ? contractAddresses[chainId][0] : null;
-
 
   const { runContractFunction: enterLottery } = useWeb3Contract({
     abi,
@@ -25,7 +24,11 @@ export default function EnterLottery() {
     msgValue: entranceFee,
   });
 
-  const { runContractFunction: getEntranceFee, isLoading, isFetching } = useWeb3Contract({
+  const {
+    runContractFunction: getEntranceFee,
+    isLoading,
+    isFetching,
+  } = useWeb3Contract({
     abi,
     contractAddress: lotteryAddress,
     functionName: "getEntranceFee",
@@ -50,9 +53,9 @@ export default function EnterLottery() {
     await enterLottery({
       onSuccess: handleSuccess,
       onError: (error) => console.log(error),
+      onComplete: handleSuccess
     });
   };
-
 
   // Notifications
   const handleSuccess = async (tx) => {
@@ -60,6 +63,7 @@ export default function EnterLottery() {
     handleNewNotification(tx);
     // getAll()
   };
+
 
   const handleNewNotification = () => {
     dispatch({
@@ -91,15 +95,18 @@ export default function EnterLottery() {
         <div>
           EnterLottery{" "}
           {entranceFee && ethers.utils.formatUnits(entranceFee, "ether")}
-           <p>
-            Total Players : {allPlayers && allPlayers};
-
-           </p>
-           <p>
-            Recent Winner: {recentWinner && recentWinner}
-           </p>
+          <p>Total Players : {allPlayers && allPlayers};</p>
+          <p>Recent Winner: {recentWinner && recentWinner}</p>
           <div>
-            <button disabled={isFetching || isLoading} onClick={handleClick}>Enter Lottery</button>
+            <button disabled={isFetching || isLoading} onClick={handleClick}>
+              {isFetching || isLoading ? (
+                <div>
+                  <Loading spinnerColor="#2E7DAF" text="Enter Lottery" />
+                </div>
+              ) : (
+                <div>Enter Lottery</div>
+              )}
+            </button>
           </div>
         </div>
       ) : (
