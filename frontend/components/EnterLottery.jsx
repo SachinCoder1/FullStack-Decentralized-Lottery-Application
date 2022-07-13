@@ -3,7 +3,6 @@ import { useWeb3Contract, useMoralis } from "react-moralis";
 import { contractAddresses, abi } from "../constants";
 import { ethers } from "ethers";
 import { Loading, useNotification } from "web3uikit";
-import Btn from "./subComponents/btns/Btn";
 
 export default function EnterLottery() {
   const [entranceFee, setEntranceFee] = useState();
@@ -128,7 +127,7 @@ export default function EnterLottery() {
           </div>
         </div>
       ) : (
-        <div>Not valid address detected</div>
+        <div className="text-white text-center">Not valid address detected</div>
       )}
     </div>
   );
