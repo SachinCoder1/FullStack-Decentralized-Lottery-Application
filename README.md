@@ -3,7 +3,8 @@ Complete Full Stack DApp (Decentralized Application) using solidity language, ha
 
 _Smart Contract Deployed on **Rinkeby Test Network**_ -> 0x47b5A79aE313DB9FdEcb705Eb6FB252A37AdB63
 
-_Check It at_ -> https://rinkeby.etherscan.io/address/0x47b5A79aE313DB9FdEcb705Eb6FB252A37AdB63c#code
+_Check It at_ -> https://shiny-dust-3581.on.fleek.co **(Deployed on fleek (IPFS)**
+_Check Smart Contract At_ -> https://rinkeby.etherscan.io/address/0x47b5A79aE313DB9FdEcb705Eb6FB252A37AdB63c#code
 
 
 
