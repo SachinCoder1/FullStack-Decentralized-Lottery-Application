@@ -127,7 +127,7 @@ export default function EnterLottery() {
           </div>
         </div>
       ) : (
-        <div className="text-white text-center">Not valid address detected</div>
+        <div className="text-white text-center">Wallet Not Connected (Connect Using Connect wallet Button in the top right)</div>
       )}
     </div>
   );

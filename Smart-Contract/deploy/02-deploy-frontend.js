@@ -28,9 +28,9 @@ const updateAbi = async () => {
 
 module.exports = async () => {
   if (process.env.UPDATE_FRONTEND) {
-    console.log("updating frontend......");
     updateContractAddress();
     updateAbi();
+    console.log("updating frontend......");
   }
 };
 
