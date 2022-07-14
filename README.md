@@ -3,7 +3,9 @@ Complete Full Stack DApp (Decentralized Application) using solidity language, ha
 
 _Smart Contract Deployed on **Rinkeby Test Network**_ -> 0x47b5A79aE313DB9FdEcb705Eb6FB252A37AdB63
 
-_Check It at_ -> https://rinkeby.etherscan.io/address/0x47b5A79aE313DB9FdEcb705Eb6FB252A37AdB63c#code
+**_Check It at_** -> https://shiny-dust-3581.on.fleek.co **(Deployed on fleek (IPFS)**
+
+_Check Smart Contract At_ -> https://rinkeby.etherscan.io/address/0x47b5A79aE313DB9FdEcb705Eb6FB252A37AdB63c#code
 
 
 
@@ -35,6 +37,7 @@ _Check It at_ -> https://rinkeby.etherscan.io/address/0x47b5A79aE313DB9FdEcb705E
 4. Moralis (For web3 integration)
 5. Web3uikit (For wallet connect button and notifications)
 6. Ethers (For converting value into ethers)
+7. Fleek IPFS (For deploying frontend)
 
 ## Blockchain
 1. Solidity (To develop Smart Contract)
